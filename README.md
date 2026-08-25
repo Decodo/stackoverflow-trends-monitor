@@ -1,194 +1,446 @@
-# Stack Overflow Scraper
+# Stack Overflow Trends Monitor
 
-Stack Overflow Scraper is an open-source monitoring tool for researching current Stack Overflow discussions, comparing topic activity over time, and using an LLM to summarize technical themes, developer pain points, and longer-term changes.
+[![](https://dcbadge.vercel.app/api/server/Ja8dqKgvbZ)](https://discord.gg/Ja8dqKgvbZ)
+![TypeScript](https://img.shields.io/badge/typescript-5.x-blue)
+![Bun](https://img.shields.io/badge/bun-%3E%3D1.2.5-black)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-The working name is intentionally provisional and can be changed later.
+<p align="center">
+<a href="https://dashboard.decodo.com/?page=residential-proxies&utm_source=socialorganic&utm_medium=social&utm_campaign=resi_trial_GITHUB"><img src="https://github.com/user-attachments/assets/60bb48bd-8dcc-48b2-82c9-a218e1e4449c"></a>
+</p>
+
+Stack
+Overflow Trends Monitor is an open-source alternative for researching
+current Stack Overflow discussions, tracking topics over time, and
+turning question data into AI-powered reports on technical themes and
+developer pain points.
+
+The tool combines the Stack Exchange API for broad discovery with
+headless Playwright and Decodo rotating residential proxies for deeper
+thread research. It can run one-off analyses or save recurring monitors
+with longitudinal history, while keeping every finding tied to the Stack
+Overflow questions that support it.
 
 ## Features
 
-- **Broad topic monitoring**. Search directly for a topic such as `python`, `javascript`, `docker`, or `api`.
-- **Optional tag filters**. Tag filtering is off by default. Enable it only when you deliberately want to narrow results.
-- **Fixed trend windows**. Choose the past week or past month. The app compares it with the immediately preceding window of the same length.
-- **Site-wide trend discovery**. No query required. Explore Stack Overflow using its Hot, Week, Votes, and Activity rankings, plus frequently occurring tags in the weekly sample.
-- **Relevance filtering**. Broad topic retrieval is classified as relevant, adjacent, or incidental before the report is synthesized. Incidental mentions are excluded from analysis.
-- **Quantitative research signals**. Reports show analyzed sample size, top tags, and the highest-engagement questions alongside the LLM summary.
-- **Adaptive question deep dives**. Playwright opens selected Stack Overflow threads headlessly through Decodo rotating residential proxies, waits for Cloudflare challenges to resolve, and retries failed pages with fresh browser contexts. A user-facing Research depth control adjusts the deep-dive budget from Focused through Comprehensive, with Standard as the default.
-- **Evidence-linked findings**. Themes and pain points link back to supporting questions instead of collecting detached excerpts at the bottom of the report.
-- **Recurring monitors**. Save a topic and rerun it daily, weekly, or monthly.
-- **Stored trend memory**. MongoDB keeps earlier reports. New runs receive up to eight previous reports from the same monitor so the LLM can identify repeated themes, emerging subjects, growth, decline, or fading discussion.
-- **History and export**. Successful runs are stored and can be exported as Markdown or JSON.
+- **Stack Overflow topic monitoring**. Research broad topics such as
+  `python`, `javascript`, `docker`, or `api`.
+- **Site-wide trend discovery**. Explore Stack Overflow without a
+  keyword using Hot, Week, Votes, and Activity rankings.
+- **Weekly and monthly comparisons**. Compare the current period with
+  the immediately preceding window of the same length.
+- **Optional tag filters**. Narrow a topic to specific Stack Overflow
+  tags only when needed.
+- **Relevance filtering**. Classify retrieved questions as relevant,
+  adjacent, or incidental before analysis.
+- **AI-powered reports**. Summarize current trends, discussion themes,
+  developer pain points, emerging signals, and notable questions.
+- **Research depth controls**. Choose Focused, Standard, Thorough, or
+  Comprehensive analysis to balance speed and depth.
+- **Full-thread deep dives**. Open selected Stack Overflow questions
+  through headless Playwright and Decodo residential proxies for richer
+  evidence than API metadata alone.
+- **Evidence-linked findings**. Keep themes and pain points connected to
+  the questions that support them.
+- **Recurring monitors**. Save research configurations and rerun them on
+  hourly, daily, weekly, or monthly schedules.
+- **Longitudinal trend analysis**. Compare new monitor runs with stored
+  observations to identify recurring, emerging, or disappearing topics.
+- **Activity signals**. Compare retrieved question volume between
+  equivalent current and previous periods without presenting the sample
+  as a site-wide traffic estimate.
+- **History and export**. Store successful runs and export reports as
+  Markdown or JSON.
 
-## Topic monitoring flow
+## How it works
 
-1. Enter one broad topic.
-2. Choose a weekly or monthly trend window.
-3. Optionally enable Stack Overflow tag filters. Tags narrow the search and are never auto-applied.
-4. Optionally save the topic as a recurring monitor.
-5. The app searches the current and immediately preceding comparison periods through the Stack Exchange API.
-6. The LLM classifies retrieved questions as relevant, adjacent, or incidental. Incidental mentions are excluded from synthesis.
-7. The app calculates quantitative signals from the retained questions, including top tags and engagement.
-8. Playwright opens a research-depth-dependent selection of current question threads through Decodo rotating residential proxies. Focused uses a smaller adaptive budget, Standard preserves the usual roughly eight-thread behavior, Thorough expands secondary evidence, and Comprehensive can investigate much more of the useful sample. A deep dive succeeds only when the actual `#question` DOM is available and the Cloudflare challenge is no longer active. Failed pages retry up to three times with fresh browser contexts.
-9. The LLM generates findings, selects notable questions with an explicit reason, links findings to supporting questions, and compares the run with stored history when earlier runs exist.
+1.  **Choose a research mode**. Enter a Stack Overflow topic or use
+    **Explore trends** for site-wide discovery.
+2.  **Configure the analysis**. Select a trend window, research depth,
+    maximum question count, and optional tag filters.
+3.  **Retrieve Stack Overflow data**. The Stack Exchange API collects
+    questions for the current and comparison periods or the selected
+    site-wide rankings.
+4.  **Filter for relevance**. The LLM separates directly relevant
+    questions from adjacent and incidental matches.
+5.  **Research selected threads**. Playwright opens promising questions
+    through Decodo rotating residential proxies and retrieves the full
+    thread for deeper analysis.
+6.  **Generate the report**. The LLM combines quantitative signals with
+    thread evidence to identify themes, pain points, emerging signals,
+    and notable questions.
+7.  **Track changes over time**. Save the configuration as a recurring
+    monitor to build longitudinal history across later runs.
+8.  **Export the results**. Download a completed report as Markdown or
+    JSON.
 
-There is no AI-generated scraping-plan step. Internally the user's topic is the search query. Tags are a separate, explicit filter rather than AI-selected query constraints.
+## Tracking Stack Overflow trends over time
 
-## Site-wide trend discovery
+Topic research compares two equivalent periods. A **Past week** analysis
+compares the current seven-day window with the preceding seven days,
+while **Past month** uses equivalent monthly windows.
 
-Choose **Explore trends** without entering a keyword. The tool combines four official Stack Exchange question rankings:
+The report separates retrieved-sample activity from broader Stack
+Overflow traffic. If collection reaches the configured cap, counts are
+shown as lower bounds and percentage-change claims are suppressed rather
+than extrapolated from incomplete data.
 
-- `hot` for questions currently ranked by Stack Overflow's Hot formula
-- `week` for the Week ranking
-- `votes` constrained to questions created in the past seven days
-- `activity` constrained to questions created in the past seven days
+Recurring monitors add a second layer of analysis. Stored reports from
+earlier observation dates let the tool distinguish between:
 
-It also counts the most frequent tags in the sampled Week-ranked questions, then deep-dives into selected threads and summarizes the broader discussion themes.
+- **Persistent questions**, where the same Stack Overflow post remains
+  visible across multiple runs.
+- **Recurring topics**, where independent questions about the same issue
+  appear across different observation dates.
+- **Emerging signals**, where a coherent issue appears in the current
+  sample but does not yet have enough history to establish recurrence.
+- **Historical absence**, where a previously observed topic is not
+  present in the current sample.
 
-## Local testing
+Repeated runs on the same calendar day are collapsed into one
+longitudinal observation window so testing does not artificially
+strengthen a trend.
 
-### Prerequisites
+## Site-wide Stack Overflow trend discovery
 
-- Bun 1.2.5 or newer
-- Docker Desktop or another Docker-compatible runtime
+**Explore trends** requires no keyword. It combines four Stack Exchange
+question rankings:
+
+| Ranking  | Purpose                                                    |
+|----------|------------------------------------------------------------|
+| Hot      | Questions currently ranked by Stack Overflow's Hot formula |
+| Week     | Questions in the weekly ranking                            |
+| Votes    | Highest-voted questions created during the current week    |
+| Activity | Recently active questions created during the current week  |
+
+The tool also identifies frequently occurring tags in the weekly sample,
+deep-dives into selected threads, and generates a broader report from
+the retrieved trend sample.
+
+The resulting metrics describe the retrieved sample rather than total
+Stack Overflow activity.
+
+## Recurring Stack Overflow monitoring
+
+Any topic analysis can be saved as a recurring monitor. A monitor stores
+its research configuration, including the topic, trend window, research
+depth, question limit, tag filters, and cadence.
+
+Supported schedules include:
+
+- Custom intervals in hours
+- Daily
+- Weekly
+- Monthly
+
+The local NestJS backend checks for due monitors once per minute.
+Automatic runs occur only while the backend and MongoDB are running, so
+the included scheduler is intended for local or always-on deployments
+rather than offline execution.
+
+The **Monitors** view shows the saved configuration, next and previous
+run times, and the status of the latest run. Monitors can also be run
+manually, paused, or deleted.
+
+## Research methodology
+
+Broad Stack Overflow searches can contain incidental keyword matches, so
+retrieved questions are classified before the report is synthesized.
+Incidental matches are excluded from the main analysis, and
+low-precision searches are flagged when fewer than half of retrieved
+questions are directly relevant.
+
+Established discussion themes and developer pain points require evidence
+from multiple directly relevant questions. A single unusual question can
+still appear as a notable question, but it is not promoted into a
+recurring theme without supporting evidence.
+
+For deeper research, the tool ranks useful questions by research value
+and topical diversity. Playwright then opens a research-depth-dependent
+selection of full Stack Overflow threads. A deep dive succeeds only
+after the actual question DOM is available and any Cloudflare challenge
+has cleared. Failed pages are retried with fresh browser contexts.
+
+Reports disclose how many deep dives were attempted and completed. If no
+full-thread retrieval succeeds, the report explicitly falls back to
+API-only evidence.
+
+## How this compares to Stack Overflow Trends and Data Explorer
+
+|                          | Stack Overflow Trends Monitor | Stack Overflow Trends | Stack Exchange Data Explorer |
+|--------------------------|-------------------------------|-----------------------|------------------------------|
+| Current status           | Open-source and self-hosted   | Retired in March 2026 | Available                    |
+| Topic monitoring         | Yes                           | Historical tag trends | Requires custom queries      |
+| Recurring monitoring     | Yes                           | No                    | No built-in monitor workflow |
+| AI analysis              | Yes                           | No                    | No                           |
+| Full-thread research     | Yes                           | No                    | Query-dependent              |
+| Longitudinal reports     | Yes                           | No                    | Requires custom analysis     |
+| Markdown and JSON export | Yes                           | No                    | Query results                |
+
+Stack Overflow Trends Monitor is not a replacement for every Data
+Explorer use case. Data Explorer remains better suited to custom
+SQL-style analysis of Stack Exchange data, while this project focuses on
+repeatable topic research, monitoring, and evidence-based report
+generation.
+
+## Prerequisites
+
+- [Bun](https://bun.sh) 1.2.5 or newer
+- [Docker](https://docker.com) or another Docker-compatible runtime
+- Google Chrome for Playwright deep dives
 - Decodo residential proxy credentials
-- At least one supported LLM API key: Anthropic, OpenAI, or Google Gemini
+- At least one supported LLM provider API key:
+  - Anthropic
+  - OpenAI
+  - Google Gemini
 
-No Stack Exchange API key is required for the current test setup.
+A Stack Exchange API key is not required for the current setup.
 
-### Setup
+## Installation
 
-```bash
+### 1. Clone the repository
+
+``` bash
+git clone https://github.com/Decodo/stackoverflow-trends-monitor.git
+cd stackoverflow-trends-monitor
+```
+
+### 2. Install dependencies
+
+``` bash
 bun install
+```
+
+### 3. Set up Decodo residential proxies
+
+The full-thread research stage requires Decodo residential proxy credentials. To set them up:
+
+1. Register or log in to the [Decodo dashboard](https://dashboard.decodo.com/).
+2. Go to [Residential proxies](https://dashboard.decodo.com/residential-proxies/pricing) and choose a plan or start a 3-day free trial.
+3. Open **Proxy setup**.
+4. Select a location or choose **Random**.
+5. Select **Rotating** as the session type and choose **HTTP(S)** as the protocol.
+6. Choose your authentication method.
+7. Copy the generated proxy username and password. You'll add these credentials to the `.env` file in the next step.
+
+### 4. Configure environment variables
+
+``` bash
 cp .env.example .env
 ```
 
-Add Decodo residential proxy credentials and at least one LLM key to `.env`, for example:
+Add your Decodo residential proxy credentials and the API key for your
+selected LLM provider:
 
-```env
-DECODO_PROXY_USERNAME=your_proxy_username
-DECODO_PROXY_PASSWORD=your_proxy_password
+``` env
+# Backend
+PORT=5002
+PUBLIC_API_BASE_URL=http://localhost:5002
+PUBLIC_FRONTEND_URL=http://localhost:5274
+
+# Database
+MONGO_PORT=27018
+REDIS_PORT=6378
+MONGODB_URI=mongodb://localhost:27018/platform
+
+# Decodo residential proxy
+DECODO_PROXY_USERNAME=
+DECODO_PROXY_PASSWORD=
 DECODO_PROXY_HOST=gate.decodo.com
 DECODO_PROXY_PORT=7000
+
+# Playwright
 PLAYWRIGHT_CHANNEL=chrome
+
+# LLM provider: claude | openai | gemini
 LLM_PROVIDER=claude
-ANTHROPIC_API_KEY=your_anthropic_key
+LLM_MODEL=
+
+# API keys
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
+GEMINI_API_KEY=
 ```
 
-Then start Docker and the application:
+Only the API key for the selected `LLM_PROVIDER` is required.
 
-```bash
+### 5. Start local databases
+
+``` bash
 bun db:up
+```
+
+This starts MongoDB and Redis through Docker Compose.
+
+### 6. Build the application
+
+``` bash
+bun run build
+```
+
+### 7. Start the application
+
+``` bash
 bun dev
 ```
 
-Open `http://localhost:5274`. The backend runs at `http://localhost:5002`.
+Open the frontend at:
 
-### Suggested tests
+``` text
+http://localhost:5274
+```
 
-For a topic monitor, start with `python`, `javascript`, or `docker`, use **Past week**, leave tag filters off, and run the analysis.
+The backend API runs at:
 
-For broad discovery, click **Explore trends**. This requires no keyword.
+``` text
+http://localhost:5002
+```
 
-## Scheduling behavior in this local version
+## Configuration
 
-Recurring schedules are persisted in MongoDB. The NestJS backend checks once per minute for monitors whose `nextRunAt` has passed.
+### Research depth
 
-Automatic runs therefore occur only while the backend and its database are running. This is suitable for local testing, but it is not an offline scheduler.
+| Setting       | Best for                                           |
+|---------------|----------------------------------------------------|
+| Focused       | Faster research with fewer full-thread deep dives  |
+| Standard      | Balanced everyday analysis and the default setting |
+| Thorough      | Broader secondary evidence                         |
+| Comprehensive | Maximum useful coverage for deeper research        |
 
-For a production version, the monitor runner should live in an always-on environment such as a cloud worker, cron service, or deployed backend. The complete workflow includes Stack Exchange API discovery, Playwright deep dives, history persistence, and LLM analysis, so the backend must be running for scheduled monitors to execute.
+Higher research depth can increase analysis time, proxy usage, and LLM
+usage.
 
-A later architecture could split collection from analysis: an always-on scheduled collector stores raw snapshots, while the LLM analyzes those snapshots when the user next opens the application.
+### Stack Overflow tag filters
 
-## Historical analysis
+Tag filtering is disabled by default. Enable it when a broad topic needs
+to be constrained to one or more Stack Overflow tags.
 
-For a recurring monitor, the report generator retrieves recent stored history tied to the same monitor ID. For unscheduled manual searches, it can compare earlier observations with the exact same topic. Multiple executions on the same calendar day are collapsed into one longitudinal observation window so repeated testing does not artificially strengthen a trend.
+For example, researching `python` with the tags `python` and `django`
+returns a much narrower sample than researching the keyword alone. Tags
+are explicit user filters and are not automatically selected by the LLM.
 
-Question IDs are preserved in historical context. The analysis distinguishes a **persistent question** (the same post remains visible across observation dates) from a **recurring topic** (independent questions about the same problem appear across dates). Confidence is limited by the number of independent questions and observation dates.
+## Data retrieval and residential proxies
 
-Historical LLM conclusions are grounded only in stored data supplied by the application. They are not hidden model memory.
+The tool uses a hybrid retrieval strategy.
 
-## Data retrieval
+The **Stack Exchange API** handles broad question discovery, comparison
+periods, and site-wide rankings. The client honors API-requested backoff
+periods, caches identical requests briefly, and retries transient
+throttling or availability errors.
 
-The tool uses the official Stack Exchange API for topic discovery, period comparison, and site-wide rankings. Selected question threads are then opened by headless Playwright through Decodo rotating residential proxies. Stack Overflow may initially return Cloudflare HTTP 403 / `Just a moment...`; the application waits for the real question DOM instead of treating that initial status as failure. Each failed thread gets up to three fresh-context attempts. Reports disclose how many deep dives were attempted and succeeded, and explicitly mark API-only analysis when none succeed.
+For deeper evidence, **Playwright** opens selected Stack Overflow
+question pages through **Decodo rotating residential proxies**. Stack
+Overflow pages may initially present a Cloudflare challenge. The scraper
+waits for the real question DOM and retries failed pages with fresh
+browser contexts rather than treating the initial response as usable
+thread content.
 
-The Stack Exchange client honors API-requested backoff periods, caches identical requests for one minute, retries transient throttling/unavailability errors, and lets site-wide trend discovery continue when an individual ranking is temporarily unavailable. The UI shows how many of the four ranking sources were successfully retrieved and explicitly marks unavailable panels.
+This approach keeps broad discovery efficient while allowing the report
+generator to analyze selected answers, comments, and full question
+context.
 
-Topic activity counts use the Stack Exchange response to detect when the configured collection cap has been reached. Capped counts are displayed as lower bounds such as `30+`, and the app suppresses percentage-change claims when either comparison period is capped.
+## Tech stack
+
+| Layer               | Technology                                                           |
+|---------------------|----------------------------------------------------------------------|
+| Frontend            | React 19, TanStack Router, TanStack Query, Tailwind CSS v4, Radix UI |
+| Backend             | NestJS 11, MongoDB, Mongoose                                         |
+| Discovery           | Stack Exchange API                                                   |
+| Deep-dive retrieval | Playwright, Decodo rotating residential proxies                      |
+| LLMs                | Anthropic Claude, OpenAI GPT, Google Gemini                          |
+| Runtime             | Bun                                                                  |
+| Local services      | Docker Compose, MongoDB, Redis                                       |
 
 ## Scripts
 
-| Command | Description |
-| --- | --- |
-| `bun dev` | Start frontend and backend development servers |
-| `bun run build` | Build all packages |
-| `bun lint` | Run linting |
-| `bun db:up` | Start local databases |
-| `bun db:down` | Stop local databases |
+| Command         | Description                                    |
+|-----------------|------------------------------------------------|
+| `bun dev`       | Start frontend and backend development servers |
+| `bun run build` | Build all application packages                 |
+| `bun lint`      | Run linting across all packages                |
+| `bun db:up`     | Start MongoDB and Redis through Docker Compose |
+| `bun db:down`   | Stop local database containers                 |
 
 ## Project structure
 
-```text
+``` text
 apps/
   backend/src/features/
-    stackexchange/ Stack Exchange API discovery and rankings
-    decodo/        Stack Overflow thread retrieval and parsing
-    tracker/       Comparison, trend discovery, deep dives, LLM reporting
-    monitors/      Saved schedules and recurring execution
-    queries/       Run history and historical retrieval
-    llm/           Provider abstraction and prompts
-    settings/      API and model configuration
+    stackexchange/  Stack Exchange API discovery and rankings
+    decodo/         Playwright thread retrieval through Decodo proxies
+    tracker/        Topic comparison, trend discovery, deep dives, and reporting
+    monitors/       Saved schedules and recurring execution
+    queries/        Run history and longitudinal retrieval
+    llm/            LLM provider abstraction and prompts
+    settings/       API and model configuration
+
   frontend/src/features/
-    tracker/       Topic analysis, site-wide trends, and reports
-    monitors/      Recurring monitor API hooks
-    queries/       History API hooks
-    settings/      Configuration
+    tracker/        Topic analysis, site-wide trends, and reports
+    monitors/       Recurring monitor controls
+    queries/        History
+    settings/       Runtime configuration
 ```
 
-## Working repository name
+## FAQ
 
-The project currently uses `stackoverflow-scraper` as the working name until the final repository and SEO naming are decided.
+### Is Stack Overflow Trends still available?
 
-## Research methodology notes
+No. Stack Overflow retired its official Trends tool in March 2026. Stack
+Overflow Trends Monitor is an open-source alternative focused on current
+topic research, recurring monitoring, question-volume comparisons,
+AI-generated analysis, and developer pain point detection rather than
+reproducing the retired interface exactly.
 
-Topic reports classify retrieved questions as relevant, adjacent, or incidental before synthesis. Incidental matches are excluded. Established discussion themes should be supported by multiple directly relevant questions. Single novel posts may appear as neutral notable questions, while emerging signals require at least two directly relevant questions supporting the same pattern. Low-precision topic searches are flagged when fewer than half of retrieved questions are directly relevant, and the UI can reveal sample excluded questions with their classification reasons.
+### How can I track Stack Overflow tag trends now that the official tool is retired?
 
-Site-wide metrics are explicitly described as properties of the retrieved trend sample rather than the whole Stack Overflow population. Ranking superlatives such as highest score, highest views, most answers, and highest research value are computed deterministically by the application instead of being invented by the LLM. Longitudinal evidence is deduplicated by question ID and same-day executions are collapsed before trend interpretation.
+Enter a broad topic, optionally constrain it with Stack Overflow tags,
+and choose a weekly or monthly comparison window. Stack Overflow Trends
+Monitor retrieves equivalent current and previous samples, reports
+activity and tag signals, and can save the configuration as a recurring
+monitor to build longitudinal history across later runs.
 
-### Evidence-integrity safeguards
+### Does this use the Stack Exchange API or web scraping?
 
-The report pipeline now performs a second evidence-validation pass before rendering discussion themes, developer pain points, or emerging signals. The validator may replace an incorrectly associated question ID with a better current question, and findings without enough directly relevant support are omitted rather than shown with weak evidence.
+Both. The Stack Exchange API handles broad question discovery, period
+comparisons, and site-wide rankings. Selected questions are then opened
+with a custom Playwright scraper through Decodo rotating residential
+proxies so the analysis can use full thread context, including answers
+and discussion that are not represented by basic question metadata
+alone.
 
-For topic searches, the JSON export also includes a relevance audit for every retrieved question, including its relevance class, classification reason, inclusion status, and research value when analyzed. Adjacent questions can support context but cannot establish a core-topic finding by themselves. The Highest engagement panel is restricted to directly relevant questions so broad or ambiguous searches do not elevate adjacent matches as representative topic results.
+### What happens when the Stack Exchange API rate-limits a request?
 
-Activity percentages describe changes in the **retrieved sample** between equivalent current and preceding periods. They are not estimates of total Stack Overflow discussion volume. Comparisons are suppressed when either period could not be retrieved or when the collection cap prevents an exact percentage. When either comparison period contains fewer than 20 retrieved questions, the UI treats it as a low-volume comparison and does not present the percentage as a strong activity signal.
+The Stack Exchange API can request a backoff period or otherwise
+throttle requests. The client honors requested backoff periods, caches
+identical requests for one minute, and retries transient throttling or
+availability failures. Site-wide discovery can continue when an
+individual ranking source is temporarily unavailable, and the report
+shows how many ranking sources were retrieved.
 
-Longitudinal research distinguishes persistent questions from recurring topics. Runs on the same day are collapsed, and closely spaced rolling observation windows can support recurrence but not directional claims such as growing or declining. When rolling windows substantially overlap, the report says that evidence remains present across overlapping retrieval windows rather than implying stronger persistence across independent periods. For a weekly monitor, directional movement requires at least seven days of comparable observation coverage; monthly monitoring requires at least 30 days. Differences in query scope, tags, time range, or site-wide ranking coverage can also make directional comparison ineligible. The UI and Markdown export report the actual ineligibility reason instead of always repeating the minimum-day threshold.
+### Do I need a Decodo account?
 
-Generated research language is instructed to treat Stack Overflow posts as developer reports rather than independent verification of universal product behavior or upstream bug status. Continued visibility of an old question is not evidence that a vendor or library issue remains unfixed outside the collected Stack Overflow material.
+Yes, for full-thread deep dives. The application uses Decodo residential
+proxy credentials when Playwright opens selected Stack Overflow question
+pages. Broad discovery comes from the Stack Exchange API, but the deeper
+research stage depends on the configured residential proxy connection.
 
+### How does this compare with the Stack Overflow Developer Survey?
 
-### Research run timestamps
+The Developer Survey is a periodic survey of developers and their tools,
+preferences, and demographics. Stack Overflow Trends Monitor instead
+researches questions appearing on Stack Overflow during user-selected
+time windows, making it useful for monitoring current technical
+discussions and recurring developer problems rather than survey
+responses.
 
-Every completed research run stores one canonical timestamp. The UI shows it in the browser's local timezone, Markdown exports preserve the ISO timestamp, and JSON/history keep the same saved run time.
+## Related repositories
 
-When a topic search retrieves more eligible questions than can be deeply analyzed, the final analysis sample is selected using both research value and topical diversity rather than simply taking the first or highest-engagement results. Empty themes or pain-point sections are valid research outcomes and are stated explicitly.
+- [Forum Scraper](https://github.com/Decodo/Forum-scraper)
+- [Decodo SDK for TypeScript](https://github.com/Decodo/sdk-ts)
+- [Decodo MCP Server](https://github.com/Decodo/mcp-server)
+- [Decodo OpenClaw
+  Skill](https://github.com/Decodo/decodo-openclaw-skill)
 
-### Debugging Playwright deep dives
+## License
 
-Deep dives use headless Playwright with Decodo residential proxy credentials. Successful challenge resolution is determined from rendered Stack Overflow DOM content, not the initial navigation HTTP status. Terminal logs include the attempt number, successful question ID, rendered HTML size, duration, and a final success/attempt summary.
-
-If Chrome is installed normally on macOS, Windows, or Linux, keep `PLAYWRIGHT_CHANNEL=chrome`. To use Playwright-managed Chromium instead, install the browser separately and clear that setting.
-
-
-## Structured evidence safeguards
-
-The analysis pipeline passes deterministic accepted-answer metadata from full-thread Playwright deep dives, tracks author diversity across longitudinal evidence, and distinguishes repeat observations of the same question from topic recurrence across distinct questions and authors. Longitudinal evidence counts are explicitly aggregated across stored observation windows. Recurring-topic classification now requires independent supporting questions to first appear on different observation dates; repeated retrieval of the same supporting posts is labeled post persistence instead. These safeguards reduce unsupported LLM inferences while preserving the existing Playwright + Decodo residential retrieval flow. Singular/plural wording in longitudinal evidence is generated from the underlying counts so exported and on-screen report copy remains grammatically correct.
-
-### Evidence and interface refinements
-
-Current-run themes, pain points, and emerging signals now expose distinct-question count, author diversity, and an evidence-strength label. Deep-dived notable questions also expose deterministic resolution state (accepted answer, answered without acceptance, or unanswered). The analysis prompt distinguishes distinct question IDs from cross-developer recurrence and avoids duplicating the same claim as both a theme and a pain point unless the analytical roles are clearly different.
-
-The frontend palette is inspired by Stack Overflow: neutral white/gray surfaces, blue interactive accents, and an orange brand accent, with a corresponding dark theme.
-
-### v13 research refinements
-
-Topic reports now flag low-precision queries below 50%, expose up to five excluded examples with classification reasons, restrict Highest engagement to directly relevant questions, and reserve the longitudinal `new` label for evidence first observed in the current window. A topic already seen in an earlier stored window and observed again is rendered as recurring rather than new.
+MIT – see [LICENSE](LICENSE).
