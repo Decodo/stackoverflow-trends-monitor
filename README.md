@@ -54,6 +54,8 @@ Overflow questions that support it.
 
 ## How it works
 
+<img width="700" height="488" alt="Stack Overflow Trends Monitor demo" src="https://github.com/user-attachments/assets/206558c7-e679-43ae-83b2-b0b288afa964" />
+
 1.  **Choose a research mode**. Enter a Stack Overflow topic or use
     **Explore trends** for site-wide discovery.
 2.  **Configure the analysis**. Select a trend window, research depth,
@@ -167,15 +169,15 @@ API-only evidence.
 
 ## How this compares to Stack Overflow Trends and Data Explorer
 
-|                          | Stack Overflow Trends Monitor | Stack Overflow Trends | Stack Exchange Data Explorer |
-|--------------------------|-------------------------------|-----------------------|------------------------------|
-| Current status           | Open-source and self-hosted   | Retired in March 2026 | Available                    |
-| Topic monitoring         | Yes                           | Historical tag trends | Requires custom queries      |
-| Recurring monitoring     | Yes                           | No                    | No built-in monitor workflow |
-| AI analysis              | Yes                           | No                    | No                           |
-| Full-thread research     | Yes                           | No                    | Query-dependent              |
-| Longitudinal reports     | Yes                           | No                    | Requires custom analysis     |
-| Markdown and JSON export | Yes                           | No                    | Query results                |
+| | Decodo Stack Overflow Trends Monitor | Official Stack Overflow Trends | Stack Exchange Data Explorer |
+| --- | --- | --- | --- |
+| **Current status** | Open-source and self-hosted | Retired in March 2026 | Available |
+| **Topic monitoring** | Yes | Historical tag trends | Requires custom queries |
+| **Recurring monitoring** | Yes | No | No built-in monitor workflow |
+| **AI analysis** | Yes | No | No |
+| **Full-thread research** | Yes | No | Query-dependent |
+| **Longitudinal reports** | Yes | No | Requires custom analysis |
+| **Markdown and JSON export** | Yes | No | Query results |
 
 Stack Overflow Trends Monitor is not a replacement for every Data
 Explorer use case. Data Explorer remains better suited to custom
