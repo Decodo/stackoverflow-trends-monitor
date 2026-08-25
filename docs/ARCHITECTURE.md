@@ -2,7 +2,7 @@
 
 ## Overview
 
-Stack Overflow Scraper is a monorepo with a React frontend, NestJS backend, MongoDB history storage, and an LLM abstraction layer.
+Stack Overflow Trends Monitor is a monorepo with a React frontend, NestJS backend, MongoDB history storage, and an LLM abstraction layer.
 
 The existing Forum Scraper infrastructure is retained, but the Reddit-specific discovery model is replaced with Stack Overflow keyword monitoring and period-over-period comparison.
 
