@@ -1,4 +1,4 @@
-# Stack Overflow Trends Monitor: track tag trends, question volume, and developer pain points
+# Stack Overflow Trends Monitor
 
 [![](https://dcbadge.vercel.app/api/server/Ja8dqKgvbZ)](https://discord.gg/Ja8dqKgvbZ)
 ![TypeScript](https://img.shields.io/badge/typescript-5.x-blue)
@@ -20,10 +20,6 @@ headless Playwright and Decodo rotating residential proxies for deeper
 thread research. It can run one-off analyses or save recurring monitors
 with longitudinal history, while keeping every finding tied to the Stack
 Overflow questions that support it.
-
-<!-- Add the final Decodo CTA banner here, matching the related Decodo repository style. -->
-
-<!-- Add demo GIF or product screenshot here. -->
 
 ## Features
 
@@ -215,7 +211,19 @@ cd stackoverflow-trends-monitor
 bun install
 ```
 
-### 3. Configure environment variables
+### 3. Set up Decodo residential proxies
+
+The full-thread research stage requires Decodo residential proxy credentials. To set them up:
+
+1. Register or log in to the [Decodo dashboard](https://dashboard.decodo.com/).
+2. Go to [Residential proxies](https://dashboard.decodo.com/residential-proxies/pricing) and choose a plan or start a 3-day free trial.
+3. Open **Proxy setup**.
+4. Select a location or choose **Random**.
+5. Select **Rotating** as the session type and choose **HTTP(S)** as the protocol.
+6. Choose your authentication method.
+7. Copy the generated proxy username and password. You'll add these credentials to the `.env` file in the next step.
+
+### 4. Configure environment variables
 
 ``` bash
 cp .env.example .env
@@ -256,7 +264,7 @@ GEMINI_API_KEY=
 
 Only the API key for the selected `LLM_PROVIDER` is required.
 
-### 4. Start local databases
+### 5. Start local databases
 
 ``` bash
 bun db:up
@@ -264,13 +272,13 @@ bun db:up
 
 This starts MongoDB and Redis through Docker Compose.
 
-### 5. Build the application
+### 6. Build the application
 
 ``` bash
 bun run build
 ```
 
-### 6. Start the application
+### 7. Start the application
 
 ``` bash
 bun dev
