@@ -5,7 +5,11 @@
 ![Bun](https://img.shields.io/badge/bun-%3E%3D1.2.5-black)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-Stack Overflow retired its official Trends tool in March 2026. Stack
+<p align="center">
+<a href="https://dashboard.decodo.com/?page=residential-proxies&utm_source=socialorganic&utm_medium=social&utm_campaign=resi_trial_GITHUB"><img src="https://github.com/user-attachments/assets/60bb48bd-8dcc-48b2-82c9-a218e1e4449c"></a>
+</p>
+
+Stack
 Overflow Trends Monitor is an open-source alternative for researching
 current Stack Overflow discussions, tracking topics over time, and
 turning question data into AI-powered reports on technical themes and
