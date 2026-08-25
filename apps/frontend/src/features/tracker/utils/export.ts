@@ -135,7 +135,7 @@ export const exportAsMarkdown = (
   }
 
   const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
-  downloadBlob(blob, `stackoverflow-scraper-${Date.now()}.md`);
+  downloadBlob(blob, `stackoverflow-trends-monitor-${Date.now()}.md`);
 };
 
 export const exportAsJson = (data: unknown): void => {
@@ -143,7 +143,7 @@ export const exportAsJson = (data: unknown): void => {
     ? { ...(data as Record<string, unknown>), generatedAt: (data as Record<string, unknown>).generatedAt ?? (data as Record<string, unknown>).createdAt }
     : data;
   const blob = new Blob([JSON.stringify(normalized, null, 2)], { type: 'application/json;charset=utf-8' });
-  downloadBlob(blob, `stackoverflow-scraper-${Date.now()}.json`);
+  downloadBlob(blob, `stackoverflow-trends-monitor-${Date.now()}.json`);
 };
 
 const downloadBlob = (blob: Blob, filename: string) => {
