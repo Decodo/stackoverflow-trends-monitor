@@ -76,6 +76,59 @@ Overflow questions that support it.
 8.  **Export the results**. Download a completed report as Markdown or
     JSON.
 
+### Example research output
+
+Reports can be exported as Markdown or JSON. The example below is a brief excerpt from a `python` topic research run using the **Past month** window and **Thorough** research depth.
+
+<details>
+<summary>View example Markdown report</summary>
+
+```markdown
+# Stack Overflow Trends Report
+
+**Topic:** python  
+**Run:** 2026-08-25
+
+## Activity signals
+
+- **python** · 90+ current retrieved vs 90+ previous retrieved · comparison unavailable because the retrieval limit was reached · At least one period reached the retrieval limit.
+
+## Research basis
+
+- 30 analyzed from 90 retrieved
+- Scope · topic · month
+- Current sample · 2026-07-26 to 2026-08-25 · comparison: 2026-06-26 to 2026-07-26
+- Relevance · 71 relevant · 19 adjacent · 0 excluded · retrieved-sample precision: 79%
+- Analysis selection · 90 eligible · 30 selected for analysis · thorough research depth · research value + topical diversity · deep dives: 14/14 successful
+- Evidence depth · selected deep dives retrieved as full Stack Overflow threads through Playwright
+- Top tags · python (30), pandas (4), python-typing (3), matplotlib (2), multithreading (2)
+
+## Current trend summary
+
+In this sample of Python questions from the past month, discussions span a broad set of topics including multithreading safety, Python type system limitations, pandas data manipulation, and file/directory scripting. Threading and concurrency questions show notable depth, with developers probing the GIL, race conditions, and thread-safe data structure access. No prior stored observation windows exist, so longitudinal analysis is limited to the current sample only.
+
+## Discussion themes
+
+### Python multithreading safety and race conditions
+
+Developers are asking whether shared Python data structures are safe to modify across threads, why race conditions appear to disappear when logging is added, and how Qt socket notifiers interact with threads. Questions span the GIL's scope, free-threading implications in Python 3.14+, and practical debugging strategies.
+
+- Evidence strength · 3 distinct questions · 3 authors · high evidence
+- Evidence · [Why can adding logging make a Python race condition disappear?](https://stackoverflow.com/questions/79993742/why-can-adding-logging-make-a-python-race-condition-disappear)
+- Evidence · [Python dictionary with threads](https://stackoverflow.com/questions/79993767/python-dictionary-with-threads)
+
+## Developer pain points
+
+### Static type checkers fail to infer correct types for dynamically created properties and generic classes
+
+Developers constructing generic classes with dynamically created properties via factory functions find that Pylance and pyright fall back to `Any` rather than the intended generic type.
+
+- Evidence strength · 2 distinct questions · 1 author · low evidence
+
+...
+```
+</details>
+
 ## Tracking Stack Overflow trends over time
 
 Topic research compares two equivalent periods. A **Past week** analysis
