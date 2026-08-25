@@ -1,0 +1,74 @@
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft } from 'lucide-react';
+import { ReportView } from '@/features/tracker/components/ReportView';
+import { useQueryDetailQuery } from '@/features/queries/api/useQueriesApi';
+import { exportAsMarkdown, exportAsJson } from '@/features/tracker/utils/export';
+
+export const Route = createFileRoute('/_layout/history/$id')({
+  component: HistoryDetailPage,
+});
+
+function HistoryDetailPage() {
+  const { id } = Route.useParams();
+  const { data: query, isLoading, isError } = useQueryDetailQuery(id);
+
+  return (
+    <div className="py-6 space-y-6">
+      <div className="flex items-center gap-3">
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/history">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            History
+          </Link>
+        </Button>
+      </div>
+
+      {isLoading && (
+        <div className="space-y-4">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      )}
+
+      {isError && (
+        <p className="text-sm text-muted-foreground">
+          Failed to load this query. It may have been deleted.
+        </p>
+      )}
+
+      {query && (
+        <>
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-1.5">
+              {query.plan.tags.map((sub) => (
+                <Badge key={sub} variant="secondary" className="text-xs">
+                  [{sub}]
+                </Badge>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              {query.plan.queries.map((q, i) => (
+                <span key={i}>"{q}"</span>
+              ))}
+              <span className="capitalize">{query.plan.timeRange}</span>
+            </div>
+          </div>
+
+          <ReportView
+            prompt={query.prompt}
+            report={query.report}
+            trendStats={query.trendStats}
+            researchSignals={query.researchSignals}
+            generatedAt={query.createdAt}
+            onExportMarkdown={() => exportAsMarkdown(query.prompt, query.report, query.trendStats, query.researchSignals, query.createdAt)}
+            onExportJson={() => exportAsJson(query)}
+          />
+        </>
+      )}
+    </div>
+  );
+}

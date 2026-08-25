@@ -1,0 +1,110 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+ :root {
+  /* Stack Overflow inspired palette */
+  --background: #ffffff;
+  --foreground: #232629;
+  --card: #ffffff;
+  --card-foreground: #232629;
+  --popover: #ffffff;
+  --popover-foreground: #232629;
+  --primary: #0a95ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f2f3;
+  --secondary-foreground: #3b4045;
+  --muted: #f1f2f3;
+  --muted-foreground: #6a737c;
+  --accent: #e1f3ff;
+  --accent-foreground: #0074cc;
+  --destructive: #d0393e;
+  --border: #d6d9dc;
+  --input: #babfc4;
+  --ring: #0a95ff;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #232629;
+  --sidebar-primary: #0a95ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e1f3ff;
+  --sidebar-accent-foreground: #0074cc;
+  --sidebar-border: #d6d9dc;
+  --sidebar-ring: #0a95ff;
+  --brand-orange: #f48024;
+  --brand-orange-soft: #fff2e2;
+  --radius: 0.375rem;
+}
+
+.dark {
+  /* Stack Overflow dark palette counterpart */
+  --background: #181a1b;
+  --foreground: #e3e6e8;
+  --card: #232629;
+  --card-foreground: #e3e6e8;
+  --popover: #232629;
+  --popover-foreground: #e3e6e8;
+  --primary: #33a7ff;
+  --primary-foreground: #ffffff;
+  --secondary: #2d2f31;
+  --secondary-foreground: #e3e6e8;
+  --muted: #2d2f31;
+  --muted-foreground: #9fa6ad;
+  --accent: #263847;
+  --accent-foreground: #6bbbf7;
+  --destructive: #e25c62;
+  --border: #3b4045;
+  --input: #525960;
+  --ring: #33a7ff;
+  --sidebar: #232629;
+  --sidebar-foreground: #e3e6e8;
+  --sidebar-primary: #33a7ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #263847;
+  --sidebar-accent-foreground: #6bbbf7;
+  --sidebar-border: #3b4045;
+  --sidebar-ring: #33a7ff;
+  --brand-orange: #f48024;
+  --brand-orange-soft: #4a3423;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  background-color: var(--background);
+  color: var(--foreground);
+}
