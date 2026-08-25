@@ -59,7 +59,7 @@ Overflow questions that support it.
 1.  **Choose a research mode**. Enter a Stack Overflow topic or use
     **Explore trends** for site-wide discovery.
 2.  **Configure the analysis**. Select a trend window, research depth,
-    maximum question count, and optional tag filters.
+   maximum question count, optional tag filters, and, if needed, a recurring schedule.
 3.  **Retrieve Stack Overflow data**. The Stack Exchange API collects
     questions for the current and comparison periods or the selected
     site-wide rankings.
@@ -387,11 +387,7 @@ apps/
 
 ### Is Stack Overflow Trends still available?
 
-No. Stack Overflow retired its official Trends tool in March 2026. Meanwhile, this Stack
-Overflow Trends Monitor tool is an open-source alternative focused on current
-topic research, recurring monitoring, question-volume comparisons,
-AI-generated analysis, and developer pain point detection rather than
-reproducing the retired interface exactly.
+No. Stack Overflow retired its official Trends tool in March 2026. The Decodo Stack Overflow Trends Monitor is an open-source alternative focused on current topic research, recurring monitoring, question-volume comparisons, AI-generated analysis, and developer pain point detection rather than reproducing the retired interface exactly.
 
 ### How can I track Stack Overflow tag trends now that the official tool is retired?
 
