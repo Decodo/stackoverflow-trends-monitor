@@ -12,7 +12,6 @@ const timeRangeLabel = (value: string) => ({ day: 'Past day', week: 'Past week',
 const depthLabel = (value?: string) => value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Standard';
 const cadenceLabel = (cadence: string, intervalHours?: number) => {
   if (cadence === 'custom-hours') return `Every ${intervalHours ?? 1} ${intervalHours === 1 ? 'hour' : 'hours'}`;
-  if (cadence === 'test-3-minutes') return 'Legacy test cadence';
   return cadence.charAt(0).toUpperCase() + cadence.slice(1);
 };
 
