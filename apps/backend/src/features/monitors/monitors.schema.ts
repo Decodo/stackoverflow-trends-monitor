@@ -22,8 +22,8 @@ export class Monitor {
     researchDepth?: 'focused' | 'standard' | 'thorough' | 'comprehensive';
   };
 
-  @Prop({ required: true, enum: ['test-3-minutes', 'custom-hours', 'daily', 'weekly', 'monthly'] })
-  cadence: 'test-3-minutes' | 'custom-hours' | 'daily' | 'weekly' | 'monthly';
+  @Prop({ required: true, enum: ['custom-hours', 'daily', 'weekly', 'monthly'] })
+  cadence: 'custom-hours' | 'daily' | 'weekly' | 'monthly';
 
   @Prop({ type: Number })
   intervalHours?: number;
