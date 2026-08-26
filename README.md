@@ -21,6 +21,17 @@ thread research. It can run one-off analyses or save recurring monitors
 with longitudinal history, while keeping every finding tied to the Stack
 Overflow questions that support it.
 
+## Quick navigation
+
+- [Features](#features)
+- [How it works](#how-it-works)
+- [Example research output](#example-research-output)
+- [Recurring monitoring](#recurring-stack-overflow-monitoring)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Data retrieval and residential proxies](#data-retrieval-and-residential-proxies)
+- [FAQ](#faq)
+
 ## Features
 
 - **Stack Overflow topic monitoring**. Research broad topics such as
@@ -321,13 +332,13 @@ GEMINI_API_KEY=
 
 Only the API key for the selected `LLM_PROVIDER` is required.
 
-### 5. Start local databases
+5. Start local databases
 
-``` bash
+Make sure Docker Desktop (or another Docker-compatible runtime) is running, then start MongoDB and Redis:
+
+```bash
 bun db:up
 ```
-
-This starts MongoDB and Redis through Docker Compose.
 
 ### 6. Build the application
 
