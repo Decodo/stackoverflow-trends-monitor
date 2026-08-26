@@ -16,7 +16,7 @@ turning question data into AI-powered reports on technical themes and
 developer pain points.
 
 The tool combines the Stack Exchange API for broad discovery with
-headless Playwright and Decodo rotating residential proxies for deeper
+headless Playwright and Decodo rotating [residential proxies](https://decodo.com/proxies/residential-proxies) for deeper
 thread research. It can run one-off analyses or save recurring monitors
 with longitudinal history, while keeping every finding tied to the Stack
 Overflow questions that support it.
@@ -54,7 +54,7 @@ Overflow questions that support it.
 
 ## How it works
 
-<img width="700" height="488" alt="Stack Overflow Trends Monitor demo" src="https://github.com/user-attachments/assets/206558c7-e679-43ae-83b2-b0b288afa964" />
+<img width="933" height="750" alt="Stack Overflow Trends Monitor demo" src="https://github.com/user-attachments/assets/6b8d6780-817d-48e7-8683-ff865e6e3d3f" />
 
 1.  **Choose a research mode**. Enter a Stack Overflow topic or use
     **Explore trends** for site-wide discovery.
@@ -78,7 +78,7 @@ Overflow questions that support it.
 
 ### Example research output
 
-Reports can be exported as Markdown or JSON. The example below is a brief excerpt from a `python` topic research run using the **Past month** window and **Thorough** research depth.
+Reports can be exported as Markdown or JSON. The example below is a shortened excerpt from a **Current trends** research run using **Thorough** research depth.
 
 <details>
 <summary>View example Markdown report</summary>
@@ -86,47 +86,49 @@ Reports can be exported as Markdown or JSON. The example below is a brief excerp
 ```markdown
 # Stack Overflow Trends Report
 
-**Topic:** python  
+**Topic:** Stack Overflow trends
 **Run:** 2026-08-25
-
-## Activity signals
-
-- **python** · 90+ current retrieved vs 90+ previous retrieved · comparison unavailable because the retrieval limit was reached · At least one period reached the retrieval limit.
 
 ## Research basis
 
-- 30 analyzed from 90 retrieved
-- Scope · topic · month
-- Current sample · 2026-07-26 to 2026-08-25 · comparison: 2026-06-26 to 2026-07-26
-- Relevance · 71 relevant · 19 adjacent · 0 excluded · retrieved-sample precision: 79%
-- Analysis selection · 90 eligible · 30 selected for analysis · thorough research depth · research value + topical diversity · deep dives: 14/14 successful
+- 31 analyzed from 31 retrieved
+- Scope · site-wide · week · rankings: 4/4
+- Current sample · 2026-08-18 to 2026-08-25
+- Analysis selection · 31 eligible · 31 selected for analysis · thorough research depth · deep dives: 15/15 successful
 - Evidence depth · selected deep dives retrieved as full Stack Overflow threads through Playwright
-- Top tags · python (30), pandas (4), python-typing (3), matplotlib (2), multithreading (2)
+- Top tags · c++ (7), python (4), android (2), c (2), css (2), dataframe (2), java (2), javascript (2)
+
+### Highest engagement
+
+- [Removing an unused class member slows down program?](https://stackoverflow.com/questions/79996455/removing-an-unused-class-member-slows-down-program) · 19 score · 1 answer · 538 views
+- [Should (double)(std::float16_t(1024) + std::float16_t(1025)) be 2048.0 or 2049.0?](https://stackoverflow.com/questions/79996927/should-doublestdfloat16-t1024-stdfloat16-t1025-be-2048-0-or-2049-0) · 12 score · 3 answers · 877 views
+- [How can I find a specific consecutive sequence of rows in SQL without MATCH_RECOGNIZE?](https://stackoverflow.com/questions/79997241/how-can-i-find-a-specific-consecutive-sequence-of-rows-in-sql-without-match-reco) · 5 score · 5 answers · 231 views
 
 ## Current trend summary
 
-In this sample of Python questions from the past month, discussions span a broad set of topics including multithreading safety, Python type system limitations, pandas data manipulation, and file/directory scripting. Threading and concurrency questions show notable depth, with developers probing the GIL, race conditions, and thread-safe data structure access. No prior stored observation windows exist, so longitudinal analysis is limited to the current sample only.
+This week's retrieved Stack Overflow sample is dominated by C++ questions covering low-level performance behavior, floating-point precision with C++23 extended types, and compiler divergence on language-standard edge cases. Several C++ questions are the highest-engagement posts in the sample and have been present across multiple prior observation windows.
+
+## Across previous runs
+
+Six observation windows span August 14–25, 2026. Three C++ questions covering struct layout and 4K aliasing, `std::float16_t` precision, and `std::pair` trivial copyability first appeared in the August 21 window and remain present in the current August 25 window, representing recurrence across two overlapping windows from distinct authors.
+
+- **C++ low-level performance and standard-library semantics** · recurring · recurring topic · high confidence · 3 distinct questions · 3 authors · observed on 4 dates
+- **C++ compiler divergence on conversion function overload resolution** · recurring · recurring topic · single-author evidence · low confidence · 2 distinct questions · 1 author · observed on 3 dates
+- **Java Gatherers API type inference and documentation friction** · not-observed · historical absence · low confidence · 2 distinct questions · 1 author · observed on 4 dates
 
 ## Discussion themes
 
-### Python multithreading safety and race conditions
+### C++ language-lawyer: compiler divergence on conversion function overload resolution
 
-Developers are asking whether shared Python data structures are safe to modify across threads, why race conditions appear to disappear when logging is added, and how Qt socket notifiers interact with threads. Questions span the GIL's scope, free-threading implications in Python 3.14+, and practical debugging strategies.
-
-- Evidence strength · 3 distinct questions · 3 authors · high evidence
-- Evidence · [Why can adding logging make a Python race condition disappear?](https://stackoverflow.com/questions/79993742/why-can-adding-logging-make-a-python-race-condition-disappear)
-- Evidence · [Python dictionary with threads](https://stackoverflow.com/questions/79993767/python-dictionary-with-threads)
-
-## Developer pain points
-
-### Static type checkers fail to infer correct types for dynamically created properties and generic classes
-
-Developers constructing generic classes with dynamically created properties via factory functions find that Pylance and pyright fall back to `Any` rather than the intended generic type.
+Two questions from the same author investigate cases where MSVC, GCC, Clang, and EDG disagree on which conversion function to select when templated and non-templated overloads coexist. The evidence comes from a single author, which limits its strength as a signal of broad developer recurrence.
 
 - Evidence strength · 2 distinct questions · 1 author · low evidence
+- Evidence · [Better match conversion function when a templated member function is available](https://stackoverflow.com/questions/79997133/better-match-conversion-function-when-a-templated-member-function-is-available)
+- Evidence · [Explicit call to conversion function treated differently than implicit call when using explicit object parameter](https://stackoverflow.com/questions/79997361/explicit-call-to-conversion-function-treated-differently-than-implicit-call-when)
 
 ...
 ```
+
 </details>
 
 ## Tracking Stack Overflow trends over time
@@ -243,7 +245,7 @@ generation.
 - [Bun](https://bun.sh) 1.2.5 or newer
 - [Docker](https://docker.com) or another Docker-compatible runtime
 - Google Chrome for Playwright deep dives
-- Decodo residential proxy credentials
+- Decodo [residential proxy](https://decodo.com/proxies/residential-proxies) credentials
 - At least one supported LLM provider API key:
   - Anthropic
   - OpenAI
