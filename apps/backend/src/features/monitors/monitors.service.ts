@@ -7,12 +7,11 @@ import { UpdateMonitorDto } from './dto/update-monitor.dto';
 import { TrackerService } from '../tracker/tracker.service';
 
 function nextRun(
-  cadence: 'test-3-minutes' | 'custom-hours' | 'daily' | 'weekly' | 'monthly',
+  cadence: 'custom-hours' | 'daily' | 'weekly' | 'monthly',
   from = new Date(),
   intervalHours?: number,
 ): Date {
   const date = new Date(from);
-  if (cadence === 'test-3-minutes') date.setMinutes(date.getMinutes() + 3);
   if (cadence === 'custom-hours') date.setHours(date.getHours() + Math.max(1, intervalHours ?? 1));
   if (cadence === 'daily') date.setDate(date.getDate() + 1);
   if (cadence === 'weekly') date.setDate(date.getDate() + 7);
@@ -32,7 +31,6 @@ export class MonitorsService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    void this.monitorModel.updateMany({ cadence: 'test-3-minutes', enabled: true }, { $set: { enabled: false } }).exec();
     this.timer = setInterval(() => void this.runDueMonitors(), 60_000);
     this.timer.unref?.();
     void this.runDueMonitors();
