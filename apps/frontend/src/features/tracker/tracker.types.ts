@@ -170,7 +170,7 @@ export interface SavedMonitor {
     maxPosts?: number;
     researchDepth?: ResearchDepth;
   };
-  cadence: MonitorCadence | 'test-3-minutes';
+  cadence: MonitorCadence;
   intervalHours?: number;
   enabled: boolean;
   nextRunAt: string;
