@@ -54,7 +54,7 @@ Overflow questions that support it.
 
 ## How it works
 
-<img width="933" height="750" alt="Stack Overflow Trends Monitor demo" src="https://github.com/user-attachments/assets/6b8d6780-817d-48e7-8683-ff865e6e3d3f" />
+<img width="650" height="523" alt="Stack Overflow Trends Monitor demo" src="https://github.com/user-attachments/assets/6b8d6780-817d-48e7-8683-ff865e6e3d3f" />
 
 1.  **Choose a research mode**. Enter a Stack Overflow topic or use
     **Explore trends** for site-wide discovery.
