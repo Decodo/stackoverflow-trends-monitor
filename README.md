@@ -268,6 +268,8 @@ A Stack Exchange API key is not required for the current setup.
 
 ### 1. Clone the repository
 
+In your terminal, run:
+
 ``` bash
 git clone https://github.com/Decodo/stackoverflow-trends-monitor.git
 cd stackoverflow-trends-monitor
@@ -293,11 +295,13 @@ The full-thread research stage requires Decodo residential proxy credentials. To
 
 ### 4. Configure environment variables
 
+Run this command in your terminal:
+
 ``` bash
 cp .env.example .env
 ```
 
-Add your Decodo residential proxy credentials and the API key for your
+Then, open the created file with a text editor to add your Decodo residential proxy credentials and the API key for your
 selected LLM provider:
 
 ``` env
@@ -332,9 +336,9 @@ GEMINI_API_KEY=
 
 Only the API key for the selected `LLM_PROVIDER` is required.
 
-5. Start local databases
+### 5. Start local databases
 
-Make sure Docker Desktop (or another Docker-compatible runtime) is running, then start MongoDB and Redis:
+Make sure Docker Desktop (or another Docker-compatible runtime) is running, then start MongoDB and Redis with this command in your terminal:
 
 ```bash
 bun db:up
@@ -352,7 +356,7 @@ bun run build
 bun dev
 ```
 
-Open the frontend at:
+To reach the frontend, open your browser and go to:
 
 ``` text
 http://localhost:5274
