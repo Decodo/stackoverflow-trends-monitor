@@ -9,7 +9,9 @@
 <a href="https://dashboard.decodo.com/?page=residential-proxies&utm_source=socialorganic&utm_medium=social&utm_campaign=resi_trial_GITHUB"><img src="https://github.com/user-attachments/assets/60bb48bd-8dcc-48b2-82c9-a218e1e4449c"></a>
 </p>
 
-Stack Overflow Trends Monitor is an open-source research tool for discovering current Stack Overflow discussions, tracking technical topics over time, and turning question data into AI-powered reports on developer trends and pain points. Research a specific topic or use **Explore trends** for a site-wide overview, then save research as a recurring monitor to track changes over time.
+Stack Overflow Trends Monitor is an open-source research tool for discovering current Stack Overflow discussions, tracking technical topics over time, and turning question data into AI-powered reports on developer trends and pain points.
+
+Research a specific topic or use **Explore trends** for a site-wide overview, then save research as a recurring monitor to track changes over time.
 
 The tool combines the Stack Exchange API for broad discovery with headless Playwright and Decodo rotating [residential proxies](https://decodo.com/proxies/residential-proxies) for deeper thread research, keeping findings tied to the Stack Overflow questions that support them.
 
