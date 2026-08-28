@@ -13,7 +13,7 @@ Stack Overflow Trends Monitor is an open-source research tool for discovering cu
 
 Research a specific topic or use **Explore trends** for a site-wide overview, then save research as a recurring monitor to track changes over time.
 
-The tool combines the Stack Exchange API for broad discovery with headless Playwright and Decodo rotating [residential proxies](https://decodo.com/proxies/residential-proxies) for deeper thread research, keeping findings tied to the Stack Overflow questions that support them.
+The tool combines the Stack Exchange API for broad discovery with headless Playwright and Decodo rotating [residential proxies](https://decodo.com/proxies/residential-proxies) to retrieve and analyze selected Stack Overflow threads in greater depth.
 
 ## Quick navigation
 
@@ -464,10 +464,7 @@ shows how many ranking sources were retrieved.
 
 ### Do I need a Decodo account?
 
-Yes, for full-thread deep dives. The application uses Decodo residential
-proxy credentials when Playwright opens selected Stack Overflow question
-pages. Broad discovery comes from the Stack Exchange API, but the deeper
-research stage depends on the configured residential proxy connection.
+Yes. The Stack Exchange API provides question discovery and metadata, but the tool needs access to full Stack Overflow threads to analyze answers, comments, and discussion in depth. Playwright retrieves these pages through Decodo rotating residential proxies, which provide reliable access when direct automated requests encounter anti-bot protections. Without the residential proxy connection, the tool is limited to API data and cannot perform its full-thread deep dives.
 
 ### How does this compare with the Stack Overflow Developer Survey?
 
