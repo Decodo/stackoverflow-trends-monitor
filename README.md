@@ -13,7 +13,7 @@ Stack Overflow Trends Monitor is an open-source research tool for discovering cu
 
 Research a specific topic or use **Explore trends** for a site-wide overview, then save research as a recurring monitor to track changes over time.
 
-The tool combines the Stack Exchange API for broad discovery with headless Playwright and Decodo rotating [residential proxies](https://decodo.com/proxies/residential-proxies) to retrieve and analyze selected Stack Overflow threads in greater depth.
+The tool combines the Stack Exchange API for broad discovery with headless Playwright and Decodo rotating [residential proxies](https://decodo.com/proxies/residential-proxies) for full-thread research, then uses your chosen LLM provider to analyze the collected data and generate reports.
 
 ## Quick navigation
 
@@ -153,7 +153,7 @@ bun install
 The full-thread research stage requires Decodo residential proxy credentials. To set them up:
 
 1. Register or log in to the [Decodo dashboard](https://dashboard.decodo.com/).
-2. Go to [Residential proxies](https://dashboard.decodo.com/residential-proxies/pricing) and choose a plan or start a 3-day free trial.
+2. Go to **Residential proxies** and choose a plan or start a 3-day free trial.
 3. Open **Proxy setup**.
 4. Select a location or choose **Random**.
 5. Select **Rotating** as the session type and choose **HTTP(S)** as the protocol.
