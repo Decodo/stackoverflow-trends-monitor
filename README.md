@@ -168,7 +168,11 @@ Run this command in your terminal to create a local `.env` file from the provide
 cp .env.example .env
 ```
 
-On macOS and Linux, files beginning with a dot may be hidden by default. If you don't see `.env` in the project folder, enable hidden files in your file browser. On macOS Finder, press **Cmd**+**Shift**+**.**; on most Linux file managers, press **Ctrl**+**H**, while on Windows, `.env` should normally be visible in File Explorer; if it isn't, select **View** → **Show** → **Hidden items**.
+Files beginning with a dot may be hidden by default. If you don't see `.env` in the project folder, enable hidden files in your file browser:
+
+- On macOS Finder, press **Cmd**+**Shift**+**.**
+- On most Linux file managers, press **Ctrl**+**H**
+- On Windows, `.env` should normally be visible in File Explorer; if it isn't, select **View** → **Show** → **Hidden items**
 
 Open the newly created `.env` file in a text editor. Add your Decodo residential proxy username and password, then select an LLM provider and add its API key:
 
