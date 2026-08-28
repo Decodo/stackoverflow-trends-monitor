@@ -9,59 +9,31 @@
 <a href="https://dashboard.decodo.com/?page=residential-proxies&utm_source=socialorganic&utm_medium=social&utm_campaign=resi_trial_GITHUB"><img src="https://github.com/user-attachments/assets/60bb48bd-8dcc-48b2-82c9-a218e1e4449c"></a>
 </p>
 
-Stack
-Overflow Trends Monitor is an open-source alternative for researching
-current Stack Overflow discussions, tracking topics over time, and
-turning question data into AI-powered reports on technical themes and
-developer pain points.
+Stack Overflow Trends Monitor is an open-source research tool for discovering current Stack Overflow discussions, tracking technical topics over time, and turning question data into AI-powered reports on developer trends and pain points. Research a specific topic or use **Explore trends** for a site-wide overview, then save research as a recurring monitor to track changes over time.
 
-The tool combines the Stack Exchange API for broad discovery with
-headless Playwright and Decodo rotating [residential proxies](https://decodo.com/proxies/residential-proxies) for deeper
-thread research. It can run one-off analyses or save recurring monitors
-with longitudinal history, while keeping every finding tied to the Stack
-Overflow questions that support it.
+The tool combines the Stack Exchange API for broad discovery with headless Playwright and Decodo rotating [residential proxies](https://decodo.com/proxies/residential-proxies) for deeper thread research, keeping findings tied to the Stack Overflow questions that support them.
 
 ## Quick navigation
 
-- [Features](#features)
+- [Key features](#key-features)
 - [How it works](#how-it-works)
-- [Example research output](#example-research-output)
-- [Recurring monitoring](#recurring-stack-overflow-monitoring)
+- [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Data retrieval and residential proxies](#data-retrieval-and-residential-proxies)
+- [Site-wide trend discovery](#site-wide-stack-overflow-trend-discovery)
+- [Tracking trends over time](#tracking-stack-overflow-trends-over-time)
+- [Recurring monitoring](#recurring-stack-overflow-monitoring)
+- [Research methodology](#research-methodology)
 - [FAQ](#faq)
 
-## Features
+## Key features
 
-- **Stack Overflow topic monitoring**. Research broad topics such as
-  `python`, `javascript`, `docker`, or `api`.
-- **Site-wide trend discovery**. Explore Stack Overflow without a
-  keyword using Hot, Week, Votes, and Activity rankings.
-- **Weekly and monthly comparisons**. Compare the current period with
-  the immediately preceding window of the same length.
-- **Optional tag filters**. Narrow a topic to specific Stack Overflow
-  tags only when needed.
-- **Relevance filtering**. Classify retrieved questions as relevant,
-  adjacent, or incidental before analysis.
-- **AI-powered reports**. Summarize current trends, discussion themes,
-  developer pain points, emerging signals, and notable questions.
-- **Research depth controls**. Choose Focused, Standard, Thorough, or
-  Comprehensive analysis to balance speed and depth.
-- **Full-thread deep dives**. Open selected Stack Overflow questions
-  through headless Playwright and Decodo residential proxies for richer
-  evidence than API metadata alone.
-- **Evidence-linked findings**. Keep themes and pain points connected to
-  the questions that support them.
-- **Recurring monitors**. Save research configurations and rerun them on
-  hourly, daily, weekly, or monthly schedules.
-- **Longitudinal trend analysis**. Compare new monitor runs with stored
-  observations to identify recurring, emerging, or disappearing topics.
-- **Activity signals**. Compare retrieved question volume between
-  equivalent current and previous periods without presenting the sample
-  as a site-wide traffic estimate.
-- **History and export**. Store successful runs and export reports as
-  Markdown or JSON.
+- **Discover what developers are discussing now**. Explore current Stack Overflow trends across the platform without needing to know what to search for first.
+- **Research specific technical topics**. Enter a keyword to uncover related discussions, recurring questions, developer pain points, and emerging signals.
+- **Go beyond question metadata**. Selected questions are researched as full Stack Overflow threads, including answers and discussion.
+- **Track topics over time**. Save recurring monitors to identify persistent questions, recurring themes, emerging signals, and topics that disappear from later samples.
+- **Keep findings verifiable**. Reports link themes and insights back to the Stack Overflow questions that support them.
+- **Export your research**. Download completed reports as Markdown or JSON for further analysis or use elsewhere.
 
 ## How it works
 
@@ -142,6 +114,168 @@ Two questions from the same author investigate cases where MSVC, GCC, Clang, and
 
 </details>
 
+## Prerequisites
+
+Before installing the project, make sure you have:
+
+- [Bun](https://bun.sh) 1.2.5 or newer
+- [Docker](https://docker.com) or another Docker-compatible runtime
+- Google Chrome, used by Playwright for full-thread research
+- Decodo [residential proxy](https://decodo.com/proxies/residential-proxies) credentials
+- At least one supported LLM provider API key:
+  - Anthropic
+  - OpenAI
+  - Google Gemini
+
+A Stack Exchange API key is not required for the current setup.
+
+## Installation
+
+### 1. Clone the repository
+
+In your terminal, run:
+
+``` bash
+git clone https://github.com/Decodo/stackoverflow-trends-monitor.git
+cd stackoverflow-trends-monitor
+```
+
+### 2. Install dependencies
+
+``` bash
+bun install
+```
+
+### 3. Set up Decodo residential proxies
+
+The full-thread research stage requires Decodo residential proxy credentials. To set them up:
+
+1. Register or log in to the [Decodo dashboard](https://dashboard.decodo.com/).
+2. Go to [Residential proxies](https://dashboard.decodo.com/residential-proxies/pricing) and choose a plan or start a 3-day free trial.
+3. Open **Proxy setup**.
+4. Select a location or choose **Random**.
+5. Select **Rotating** as the session type and choose **HTTP(S)** as the protocol.
+6. Choose your authentication method.
+7. Copy the generated proxy username and password. You'll add these credentials to the `.env` file in the next step.
+
+### 4. Configure environment variables
+
+Run this command in your terminal to create a local `.env` file from the provided example:
+
+``` bash
+cp .env.example .env
+```
+
+Open the newly created `.env` file in a text editor. Add your Decodo residential proxy username and password, then select an LLM provider and add its API key:
+
+``` env
+# Backend
+PORT=5002
+PUBLIC_API_BASE_URL=http://localhost:5002
+PUBLIC_FRONTEND_URL=http://localhost:5274
+
+# Database
+MONGO_PORT=27018
+REDIS_PORT=6378
+MONGODB_URI=mongodb://localhost:27018/platform
+
+# Decodo residential proxy
+DECODO_PROXY_USERNAME=
+DECODO_PROXY_PASSWORD=
+DECODO_PROXY_HOST=gate.decodo.com
+DECODO_PROXY_PORT=7000
+
+# Playwright
+PLAYWRIGHT_CHANNEL=chrome
+
+# LLM provider: claude | openai | gemini
+LLM_PROVIDER=claude
+LLM_MODEL=
+
+# API keys
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
+GEMINI_API_KEY=
+```
+
+Only the API key for your selected `LLM_PROVIDER` is required. For example, if you use `LLM_PROVIDER=claude`, add your `ANTHROPIC_API_KEY` and leave the OpenAI and Gemini keys empty.
+
+### 5. Start local databases
+
+Make sure Docker Desktop (or another Docker-compatible runtime) is running, then start MongoDB and Redis with this command in your terminal:
+
+```bash
+bun db:up
+```
+
+### 6. Build the application
+
+``` bash
+bun run build
+```
+
+### 7. Start the application
+
+``` bash
+bun dev
+```
+
+Keep this terminal window open while using the application. Closing it stops the local frontend and backend.
+
+To reach the frontend, open your browser and go to:
+
+``` text
+http://localhost:5274
+```
+
+The backend API runs at:
+
+``` text
+http://localhost:5002
+```
+
+## Configuration
+
+### Research depth
+
+| Setting       | Best for                                           |
+|---------------|----------------------------------------------------|
+| Focused       | Faster research with fewer full-thread deep dives  |
+| Standard      | Balanced everyday analysis and the default setting |
+| Thorough      | Broader secondary evidence                         |
+| Comprehensive | Maximum useful coverage for deeper research        |
+
+Higher research depth can increase analysis time, proxy usage, and LLM
+usage.
+
+### Stack Overflow tag filters
+
+Tag filtering is disabled by default. Enable it when a broad topic needs
+to be constrained to one or more Stack Overflow tags.
+
+For example, researching `python` with the tags `python` and `django`
+returns a much narrower sample than researching the keyword alone. Tags
+are explicit user filters and are not automatically selected by the LLM.
+
+## Site-wide Stack Overflow trend discovery
+
+**Explore trends** requires no keyword. It combines four Stack Exchange
+question rankings:
+
+| Ranking  | Purpose                                                    |
+|----------|------------------------------------------------------------|
+| Hot      | Questions currently ranked by Stack Overflow's Hot formula |
+| Week     | Questions in the weekly ranking                            |
+| Votes    | Highest-voted questions created during the current week    |
+| Activity | Recently active questions created during the current week  |
+
+The tool also identifies frequently occurring tags in the weekly sample,
+deep-dives into selected threads, and generates a broader report from
+the retrieved trend sample.
+
+The resulting metrics describe the retrieved sample rather than total
+Stack Overflow activity.
+
 ## Tracking Stack Overflow trends over time
 
 Topic research compares two equivalent periods. A **Past week** analysis
@@ -168,25 +302,6 @@ earlier observation dates let the tool distinguish between:
 Repeated runs on the same calendar day are collapsed into one
 longitudinal observation window so testing does not artificially
 strengthen a trend.
-
-## Site-wide Stack Overflow trend discovery
-
-**Explore trends** requires no keyword. It combines four Stack Exchange
-question rankings:
-
-| Ranking  | Purpose                                                    |
-|----------|------------------------------------------------------------|
-| Hot      | Questions currently ranked by Stack Overflow's Hot formula |
-| Week     | Questions in the weekly ranking                            |
-| Votes    | Highest-voted questions created during the current week    |
-| Activity | Recently active questions created during the current week  |
-
-The tool also identifies frequently occurring tags in the weekly sample,
-deep-dives into selected threads, and generates a broader report from
-the retrieved trend sample.
-
-The resulting metrics describe the retrieved sample rather than total
-Stack Overflow activity.
 
 ## Recurring Stack Overflow monitoring
 
@@ -251,146 +366,6 @@ SQL-style analysis of Stack Exchange data, while this project focuses on
 repeatable topic research, monitoring, and evidence-based report
 generation.
 
-## Prerequisites
-
-- [Bun](https://bun.sh) 1.2.5 or newer
-- [Docker](https://docker.com) or another Docker-compatible runtime
-- Google Chrome for Playwright deep dives
-- Decodo [residential proxy](https://decodo.com/proxies/residential-proxies) credentials
-- At least one supported LLM provider API key:
-  - Anthropic
-  - OpenAI
-  - Google Gemini
-
-A Stack Exchange API key is not required for the current setup.
-
-## Installation
-
-### 1. Clone the repository
-
-In your terminal, run:
-
-``` bash
-git clone https://github.com/Decodo/stackoverflow-trends-monitor.git
-cd stackoverflow-trends-monitor
-```
-
-### 2. Install dependencies
-
-``` bash
-bun install
-```
-
-### 3. Set up Decodo residential proxies
-
-The full-thread research stage requires Decodo residential proxy credentials. To set them up:
-
-1. Register or log in to the [Decodo dashboard](https://dashboard.decodo.com/).
-2. Go to [Residential proxies](https://dashboard.decodo.com/residential-proxies/pricing) and choose a plan or start a 3-day free trial.
-3. Open **Proxy setup**.
-4. Select a location or choose **Random**.
-5. Select **Rotating** as the session type and choose **HTTP(S)** as the protocol.
-6. Choose your authentication method.
-7. Copy the generated proxy username and password. You'll add these credentials to the `.env` file in the next step.
-
-### 4. Configure environment variables
-
-Run this command in your terminal:
-
-``` bash
-cp .env.example .env
-```
-
-Then, open the created file with a text editor to add your Decodo residential proxy credentials and the API key for your
-selected LLM provider:
-
-``` env
-# Backend
-PORT=5002
-PUBLIC_API_BASE_URL=http://localhost:5002
-PUBLIC_FRONTEND_URL=http://localhost:5274
-
-# Database
-MONGO_PORT=27018
-REDIS_PORT=6378
-MONGODB_URI=mongodb://localhost:27018/platform
-
-# Decodo residential proxy
-DECODO_PROXY_USERNAME=
-DECODO_PROXY_PASSWORD=
-DECODO_PROXY_HOST=gate.decodo.com
-DECODO_PROXY_PORT=7000
-
-# Playwright
-PLAYWRIGHT_CHANNEL=chrome
-
-# LLM provider: claude | openai | gemini
-LLM_PROVIDER=claude
-LLM_MODEL=
-
-# API keys
-ANTHROPIC_API_KEY=
-OPENAI_API_KEY=
-GEMINI_API_KEY=
-```
-
-Only the API key for the selected `LLM_PROVIDER` is required.
-
-### 5. Start local databases
-
-Make sure Docker Desktop (or another Docker-compatible runtime) is running, then start MongoDB and Redis with this command in your terminal:
-
-```bash
-bun db:up
-```
-
-### 6. Build the application
-
-``` bash
-bun run build
-```
-
-### 7. Start the application
-
-``` bash
-bun dev
-```
-
-To reach the frontend, open your browser and go to:
-
-``` text
-http://localhost:5274
-```
-
-The backend API runs at:
-
-``` text
-http://localhost:5002
-```
-
-## Configuration
-
-### Research depth
-
-| Setting       | Best for                                           |
-|---------------|----------------------------------------------------|
-| Focused       | Faster research with fewer full-thread deep dives  |
-| Standard      | Balanced everyday analysis and the default setting |
-| Thorough      | Broader secondary evidence                         |
-| Comprehensive | Maximum useful coverage for deeper research        |
-
-Higher research depth can increase analysis time, proxy usage, and LLM
-usage.
-
-### Stack Overflow tag filters
-
-Tag filtering is disabled by default. Enable it when a broad topic needs
-to be constrained to one or more Stack Overflow tags.
-
-For example, researching `python` with the tags `python` and `django`
-returns a much narrower sample than researching the keyword alone. Tags
-are explicit user filters and are not automatically selected by the LLM.
-
 ## Data retrieval and residential proxies
 
 The tool uses a hybrid retrieval strategy.
@@ -423,16 +398,6 @@ context.
 | Runtime             | Bun                                                                  |
 | Local services      | Docker Compose, MongoDB, Redis                                       |
 
-## Scripts
-
-| Command         | Description                                    |
-|-----------------|------------------------------------------------|
-| `bun dev`       | Start frontend and backend development servers |
-| `bun run build` | Build all application packages                 |
-| `bun lint`      | Run linting across all packages                |
-| `bun db:up`     | Start MongoDB and Redis through Docker Compose |
-| `bun db:down`   | Stop local database containers                 |
-
 ## Project structure
 
 ``` text
@@ -452,6 +417,16 @@ apps/
     queries/        History
     settings/       Runtime configuration
 ```
+
+## Scripts
+
+| Command         | Description                                    |
+|-----------------|------------------------------------------------|
+| `bun dev`       | Start frontend and backend development servers |
+| `bun run build` | Build all application packages                 |
+| `bun lint`      | Run linting across all packages                |
+| `bun db:up`     | Start MongoDB and Redis through Docker Compose |
+| `bun db:down`   | Stop local database containers                 |
 
 ## FAQ
 
