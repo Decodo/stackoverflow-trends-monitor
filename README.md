@@ -483,7 +483,8 @@ responses.
 
 ## Related repositories
 
-- [Forum Scraper](https://github.com/Decodo/Forum-scraper)
+- [Decodo GitHub Research](https://github.com/Decodo/github-research)
+- [Decodo Forum Scraper](https://github.com/Decodo/Forum-scraper)
 - [Decodo SDK for TypeScript](https://github.com/Decodo/sdk-ts)
 - [Decodo MCP Server](https://github.com/Decodo/mcp-server)
 - [Decodo OpenClaw
