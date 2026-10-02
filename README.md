@@ -484,6 +484,7 @@ responses.
 ## Related repositories
 
 - [Decodo GitHub Research](https://github.com/Decodo/github-research)
+- [Decodo Hacker News Research](https://github.com/Decodo/hackernews-research)
 - [Decodo Forum Scraper](https://github.com/Decodo/Forum-scraper)
 - [Decodo SDK for TypeScript](https://github.com/Decodo/sdk-ts)
 - [Decodo MCP Server](https://github.com/Decodo/mcp-server)
