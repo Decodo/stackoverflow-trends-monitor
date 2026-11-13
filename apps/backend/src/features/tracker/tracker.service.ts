@@ -96,6 +96,7 @@ interface ObservationSnapshot {
   executiveSummary?: string;
   themes?: StackOverflowReport['themes'];
   developerPainPoints?: StackOverflowReport['developerPainPoints'];
+  longitudinalSignals?: StackOverflowReport['longitudinal']['signals'];
 }
 
 export type ProgressEvent =
@@ -660,6 +661,7 @@ export class TrackerService {
         executiveSummary: run.report?.executiveSummary,
         themes: run.report?.themes,
         developerPainPoints: run.report?.developerPainPoints,
+        longitudinalSignals: run.report?.longitudinal?.signals,
       }));
   }
 
@@ -747,23 +749,73 @@ export class TrackerService {
     );
 
     const raw = this.llmService.parseJsonResponse<RawReport>(response.content);
-    const validated = await this.validateEvidence(raw, posts, classifications, signal);
-    return this.enrichReport(validated, posts, details, observations, currentDate, classifications, directionEligible, observationSpanDays, requiredSpanDays, methodologyComparable, directionIneligibleReasons);
+    this.logger.log(
+      'Research draft findings: ' +
+      (raw.themes?.length ?? 0) + ' themes, ' +
+      (raw.developerPainPoints?.length ?? 0) + ' pain points, ' +
+      (raw.emergingSignals?.length ?? 0) + ' emerging signals, ' +
+      (raw.notableQuestions?.length ?? 0) + ' notable questions, ' +
+      (raw.longitudinal?.signals?.length ?? 0) + ' historical signals',
+    );
+    const validated = await this.validateEvidence(raw, posts, classifications, observations, signal);
+    return this.enrichReport(validated, posts, details, observations, currentDate, classifications, directionEligible, observationSpanDays, requiredSpanDays, methodologyComparable, directionIneligibleReasons, researchSignals.methodology?.mode === 'site-wide');
   }
 
   private async validateEvidence(
     raw: RawReport,
     posts: StackOverflowQuestion[],
     classifications: RelevanceClassification[],
+    observations: ObservationSnapshot[],
     signal?: AbortSignal,
   ): Promise<RawReport> {
     const findings = [
-      ...(raw.themes ?? []).map((item, index) => ({ key: `theme:${index}`, title: item.title, description: item.description, proposedEvidenceQuestionIds: item.evidenceQuestionIds ?? [] })),
-      ...(raw.developerPainPoints ?? []).map((item, index) => ({ key: `pain:${index}`, title: item.title, description: item.description, proposedEvidenceQuestionIds: item.evidenceQuestionIds ?? [] })),
-      ...(raw.emergingSignals ?? []).map((item, index) => ({ key: `emerging:${index}`, title: item.title, description: item.description, proposedEvidenceQuestionIds: item.evidenceQuestionIds ?? [] })),
+      ...(raw.themes ?? []).map((item, index) => ({ key: 'theme:' + index, title: item.title, description: item.description, proposedEvidenceQuestionIds: item.evidenceQuestionIds ?? [] })),
+      ...(raw.developerPainPoints ?? []).map((item, index) => ({ key: 'pain:' + index, title: item.title, description: item.description, proposedEvidenceQuestionIds: item.evidenceQuestionIds ?? [] })),
+      ...(raw.emergingSignals ?? []).map((item, index) => ({ key: 'emerging:' + index, title: item.title, description: item.description, proposedEvidenceQuestionIds: item.evidenceQuestionIds ?? [] })),
+      ...(raw.longitudinal?.signals ?? []).map((item, index) => ({ key: 'longitudinal:' + index, title: item.topic, description: item.evidence, proposedEvidenceQuestionIds: item.evidenceQuestionIds ?? [] })),
     ];
     if (!findings.length || !posts.length) return raw;
+
+    const currentIds = new Set(posts.map((question) => String(question.id)));
     const classificationById = new Map(classifications.map((item) => [String(item.questionId), item]));
+    const historicalQuestions = [...new Map(
+      observations.slice(-8).flatMap((observation) => observation.questions.map((question) => ({ ...question, sourceDate: observation.date })))
+        .filter((question) => !currentIds.has(String(question.id)))
+        .map((question) => [String(question.id), question] as const),
+    ).values()].slice(0, 250);
+    const allQuestions = [
+      ...posts.map((question) => ({ ...question, current: true, sourceDate: 'current' })),
+      ...historicalQuestions.map((question) => ({ ...question, excerpt: '', current: false })),
+    ];
+    const byId = new Map(allQuestions.map((question) => [String(question.id), question]));
+    const historicalFindings = observations.slice(-8).flatMap((observation) => [
+      ...(observation.themes ?? []).map((item) => ({ date: observation.date, topic: item.title, type: 'theme' })),
+      ...(observation.developerPainPoints ?? []).map((item) => ({ date: observation.date, topic: item.title, type: 'pain point' })),
+      ...(observation.longitudinalSignals ?? []).map((item) => ({ date: observation.date, topic: item.topic, type: 'longitudinal' })),
+    ]).slice(-70);
+
+    // Example deterministic domain boundary: C-only unit-testing questions
+    // cannot substantiate a finding specifically about C++ language semantics.
+    const withinLanguageScope = (title: string, id: string): boolean => {
+      const question = byId.get(id);
+      if (!question) return false;
+      if (/(?:^|[^a-z])c\+\+(?!\w)/i.test(title) && !/c\s*\/\s*c\+\+/i.test(title)) {
+        const tags = (question.tags ?? []).map((tag) => tag.toLowerCase());
+        if (tags.includes('c') && !tags.some((tag) => tag.startsWith('c++'))) return false;
+      }
+      return true;
+    };
+
+    const emptyEvidence = (): RawReport => ({
+      ...raw,
+      themes: (raw.themes ?? []).map((item) => ({ ...item, evidenceQuestionIds: [] })),
+      developerPainPoints: (raw.developerPainPoints ?? []).map((item) => ({ ...item, evidenceQuestionIds: [] })),
+      emergingSignals: (raw.emergingSignals ?? []).map((item) => ({ ...item, evidenceQuestionIds: [] })),
+      longitudinal: raw.longitudinal
+        ? { ...raw.longitudinal, signals: raw.longitudinal.signals.map((item) => ({ ...item, evidenceQuestionIds: [] })) }
+        : undefined,
+    });
+
     try {
       const response = await this.llmService.complete(
         {
@@ -773,12 +825,15 @@ export class TrackerService {
               role: 'user',
               content: JSON.stringify({
                 findings,
-                questions: posts.map((question) => ({
-                  id: question.id,
+                priorTopicFindings: historicalFindings,
+                questions: allQuestions.map((question) => ({
+                  id: String(question.id),
                   title: question.title,
                   tags: question.tags,
-                  excerpt: question.excerpt,
-                  relevance: classificationById.get(question.id)?.level ?? 'relevant',
+                  excerpt: question.excerpt ?? '',
+                  current: question.current,
+                  sourceDate: question.sourceDate,
+                  relevance: classificationById.get(String(question.id))?.level ?? 'relevant',
                 })),
               }),
             },
@@ -788,21 +843,49 @@ export class TrackerService {
         signal,
       );
       const parsed = this.llmService.parseJsonResponse<{ validations?: EvidenceValidationResult[] }>(response.content);
-      const validIds = new Set(posts.map((question) => question.id));
-      const byKey = new Map((parsed.validations ?? []).map((item) => {
-        const ids = item.coherent === false ? [] : [...new Set((item.evidenceQuestionIds ?? []).map(String).filter((id) => validIds.has(id)))].slice(0, 3);
-        return [item.key, ids] as const;
-      }));
-      const apply = <T extends { evidenceQuestionIds?: string[] }>(items: T[] = [], prefix: string): T[] => items.map((item, index) => ({ ...item, evidenceQuestionIds: byKey.get(`${prefix}:${index}`) ?? [] }));
+      if (!Array.isArray(parsed.validations)) throw new Error('Evidence audit omitted validations');
+      this.logger.log(
+        'Evidence audit: ' + parsed.validations.length + '/' + findings.length +
+        ' findings reviewed; ' + parsed.validations.filter((item) => item.coherent === true).length +
+        ' marked coherent; ' + parsed.validations.filter((item) => item.coherent === false).length +
+        ' explicitly rejected',
+      );
+
+      const byKey = new Map((parsed.validations ?? []).map((item) => [
+        item.key,
+        item.coherent === true ? [...new Set((item.evidenceQuestionIds ?? []).map(String).filter((id) => byId.has(id)))].slice(0, 8) : [],
+      ] as const));
+
+      const apply = <T extends { title: string; evidenceQuestionIds?: string[] }>(items: T[] = [], prefix: string): T[] =>
+        items.map((item, index) => ({
+          ...item,
+          evidenceQuestionIds: (byKey.get(prefix + ':' + index) ?? [])
+            .filter((id) => currentIds.has(id) && withinLanguageScope(item.title, id))
+            .slice(0, 3),
+        }));
+
+      const longitudinal = raw.longitudinal
+        ? {
+            ...raw.longitudinal,
+            signals: raw.longitudinal.signals.map((item, index) => ({
+              ...item,
+              evidenceQuestionIds: (byKey.get('longitudinal:' + index) ?? [])
+                .filter((id) => withinLanguageScope(item.topic, id)),
+            })),
+          }
+        : undefined;
+
       return {
         ...raw,
         themes: apply(raw.themes ?? [], 'theme'),
         developerPainPoints: apply(raw.developerPainPoints ?? [], 'pain'),
         emergingSignals: apply(raw.emergingSignals ?? [], 'emerging'),
+        longitudinal,
       };
     } catch (error) {
-      this.logger.warn(`Evidence validation failed; falling back to generated evidence IDs: ${error instanceof Error ? error.message : String(error)}`);
-      return raw;
+      this.logger.warn('Evidence validation failed; suppressing unaudited findings: ' +
+        (error instanceof Error ? error.message : String(error)));
+      return emptyEvidence();
     }
   }
 
@@ -818,6 +901,7 @@ export class TrackerService {
     requiredSpanDays = 7,
     methodologyComparable = false,
     directionIneligibleReasons: Array<'insufficient-history' | 'insufficient-span' | 'methodology-mismatch'> = [],
+    siteWide = false,
   ): StackOverflowReport {
     const byId = new Map(posts.map((question) => [question.id, question]));
     const detailById = new Map(details.map((question) => [question.id, question]));
@@ -855,7 +939,22 @@ export class TrackerService {
       return filtered.join('; ') || 'Research relevance';
     };
 
-    const notableQuestions = (raw.notableQuestions ?? [])
+    const llmNotables = raw.notableQuestions ?? [];
+    // If the model fails to select notable questions, retain a grounded
+    // selection instead of publishing an empty section despite strong evidence.
+    const notableCandidates = llmNotables.length
+      ? llmNotables
+      : [...posts]
+          .sort((a, b) => (values.get(b.id) ?? 0) - (values.get(a.id) ?? 0) || b.score - a.score)
+          .slice(0, 5)
+          .map((question) => ({
+            questionId: question.id,
+            selectionReason: 'High technical research value relative to this week\'s retrieved questions',
+          }));
+    if (!llmNotables.length && posts.length) {
+      this.logger.warn('Research draft omitted notable questions; using a deterministic current-question shortlist.');
+    }
+    const notableQuestions = notableCandidates
       .map((item) => {
         const question = byId.get(String(item.questionId));
         if (!question) return null;
@@ -871,8 +970,15 @@ export class TrackerService {
         let selectionReason = cleanReason(item.selectionReason);
         if (resolutionStatus === 'accepted-answer') {
           selectionReason = selectionReason
-            .replace(/\bunresolved\s+(pain point|question|thread|issue)\b/gi, 'resolved thread')
-            .replace(/\bunanswered\s+(question|thread|issue)\b/gi, 'resolved thread');
+            .replace(/\bunresolved\s+(pain point|question|thread|issue)\b/gi, 'answered thread')
+            .replace(/\bunanswered\s+(question|thread|issue)\b/gi, 'answered thread');
+        } else {
+          // Answers alone do not establish resolution; only accepted-answer
+          // metadata may support a stronger (still qualified) description.
+          selectionReason = selectionReason
+            .replace(/\bresolved\s+(thread|question|issue)\b/gi,
+              question.answerCount > 0 ? 'answered question' : 'question')
+            .replace(/\bfully resolved\b/gi, 'discussed');
         }
         selectionReason = selectionReason
           .replace(/\bemerging issue\b/gi, 'isolated new report')
@@ -983,8 +1089,14 @@ export class TrackerService {
         evidence = `Supporting question ${ids.length === 1 ? 'ID' : 'IDs'} (${ids.join(', ')}) were observed in prior stored windows but are not present in the current ${currentDate} sample. Absence is noted neutrally because directional analysis is handled separately.`;
       }
 
-      return { ...signal, evidence, direction, confidence, evidenceType, independentQuestionCount, independentAuthorCount, observationCount };
-    });
+      return { ...signal, evidence, direction, confidence, evidenceType, independentQuestionCount, independentAuthorCount, observationCount, currentEvidenceCount: currentSupportingIds.length };
+    }).filter((item) =>
+      item.independentQuestionCount > 0 &&
+      (item.evidenceType !== 'new-signal' || item.currentEvidenceCount >= 2) &&
+      // A small rolling weekly sample does not establish a meaningful absence.
+      // Demand sustained historical evidence before reporting not-observed.
+      (item.evidenceType !== 'historical-absence' || (item.observationCount >= 3 && item.independentQuestionCount >= 2)),
+    );
 
     const enrichedFinding = (item: { title: string; description: string; evidenceQuestionIds?: string[] }) => {
       const evidence = evidenceFor(item.evidenceQuestionIds);
@@ -1041,20 +1153,80 @@ export class TrackerService {
       return relevantIds.size >= 2;
     });
 
+    // Prefer a precise validated current-theme title when an emerging
+    // historical cluster references exactly the same source questions.
+    const preciseLongitudinalSignals = longitudinalSignals.map((signal) => {
+      if (signal.evidenceType !== 'new-signal') return signal;
+      const ids = new Set((signal.evidenceQuestionIds ?? []).map(String));
+      const matchingTheme = themes.find((theme) => {
+        const themeIds = (theme.evidence ?? []).map((item) => String(item.questionId));
+        return themeIds.length >= 2 && themeIds.length === ids.size
+          && themeIds.every((id) => ids.has(id));
+      });
+      return matchingTheme ? { ...signal, topic: matchingTheme.title } : signal;
+    });
+
+    // Site-wide executive summaries must never import unrelated claims from
+    // historical windows. Build a source-anchored summary from CURRENT posts,
+    // leaving interpretation of supported clusters to the validated findings.
+    const tagCounts = new Map<string, number>();
+    for (const question of posts) {
+      for (const tag of question.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+    }
+    const leadingTags = [...tagCounts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 4)
+      .map(([tag, count]) => tag + ' (' + count + ')');
+    const mostEngaged = [...posts]
+      .sort((a, b) => b.score - a.score || b.viewCount - a.viewCount)
+      .slice(0, 2);
+    const trimTitle = (title: string) => title.length > 125 ? title.slice(0, 122).trimEnd() + '…' : title;
+    const currentSummary = [
+      'This week\'s retrieved sample contains ' + posts.length +
+        ' Stack Overflow questions, with the most represented tags being ' + leadingTags.join(', ') + '.',
+      mostEngaged.length
+        ? 'Higher-scoring questions include ' + mostEngaged.map((q) => '“' + trimTitle(q.title).replace(/["“”]/g, "'") + '”').join(' and ') + '.'
+        : '',
+      themes.length
+        ? 'Validated discussion themes include ' + themes.slice(0, 2).map((item) => item.title).join(' and ') + '.'
+        : 'No multi-question discussion theme passed the evidence threshold in this sample.',
+    ].filter(Boolean).join(' ');
+    const confirmedRecurring = preciseLongitudinalSignals.filter((item) => item.evidenceType === 'recurring-topic' || item.evidenceType === 'post-persistence');
+    const confirmedNew = preciseLongitudinalSignals.filter((item) => item.evidenceType === 'new-signal');
+    const historicalAbsent = preciseLongitudinalSignals.filter((item) => item.evidenceType === 'historical-absence');
+    const longitudinalSummary = preciseLongitudinalSignals.length
+      ? [
+          confirmedRecurring.length
+            ? 'Validated recurring or repeatedly observed topics: ' + confirmedRecurring.map((item) => item.topic).join('; ') + '.'
+            : '',
+          confirmedNew.length
+            ? 'Newly observed clusters supported by multiple questions: ' + confirmedNew.map((item) => item.topic).join('; ') + '.'
+            : '',
+          historicalAbsent.length
+            ? 'Previously recorded topics absent from the current sample: ' + historicalAbsent.map((item) => item.topic).join('; ') + '. This is not evidence of decline.'
+            : '',
+        ].filter(Boolean).join(' ')
+      : 'No longitudinal findings passed the validated evidence threshold for this sample.';
+
+    this.logger.log('Published findings after audit: ' +
+      themes.length + ' themes, ' + developerPainPoints.length + ' pain points, ' +
+      emergingSignals.length + ' emerging signals, ' + notableQuestions.length +
+      ' notable questions, ' + preciseLongitudinalSignals.length + ' historical signals');
+
     return {
-      executiveSummary: raw.executiveSummary,
+      executiveSummary: siteWide ? currentSummary : raw.executiveSummary,
       themes,
       developerPainPoints,
       emergingSignals,
       notableQuestions,
       longitudinal: {
-        summary: raw.longitudinal?.summary ?? 'No longitudinal analysis available.',
+        summary: longitudinalSummary,
         observationSpanDays,
         requiredSpanDays,
         directionEligible,
         methodologyComparable,
         directionIneligibleReasons,
-        signals: longitudinalSignals,
+        signals: preciseLongitudinalSignals,
       },
     };
   }
