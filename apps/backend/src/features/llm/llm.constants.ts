@@ -36,6 +36,13 @@ Return ONLY valid JSON with this shape:
 
 Rules:
 - For every supplied finding key, choose only question IDs whose title, tags, and excerpt directly support the finding's title and description.
+- Keys theme:*, pain:* and emerging:* are CURRENT findings. Validate them using current questions only; do not include historical IDs.
+- Keys longitudinal:* are comparisons across observation windows. For these, validate current AND historical question IDs together. Include historical IDs only when they support the same precise technical subject; matching words or programming languages are not sufficient.
+- For a longitudinal topic already represented in priorTopicFindings, prefer a genuinely coherent current-plus-prior evidence set and never call it new merely because the current post IDs are newly observed.
+- A question on introducing unit tests into a C project does NOT support a finding about C++ language semantics. C, C++, and C# are distinct languages for evidence grouping; do not group only by programming-language family.
+- Distinguish a broad topic label from a concrete phenomenon: C++ language rules, compiler optimizations, and C unit testing are different research subjects.
+- For longitudinal findings whose topic is too vague to validate, return coherent=false and no evidence IDs rather than accepting an umbrella category.
+- If a finding claims a trend but has only one isolated current question, provide that single ID only if it precisely matches; the application decides whether to suppress the insufficiently supported signal.
 - You may replace an originally selected question with a better supplied current question.
 - Exclude merely topical, adjacent, or contradictory questions.
 - For findings with multiple evidence questions, validate semantic coherence: the questions must independently demonstrate the SAME concrete phenomenon, failure mode, implementation problem, or decision. Shared language, ecosystem, or broad technology domain is not enough.
@@ -74,6 +81,10 @@ Return a JSON object with exactly this shape:
 
 Rules:
 - Ground all conclusions in supplied Stack Overflow content, measured statistics, quantitative research signals, and stored observation windows.
+- Use specific technical nouns, failure modes, library features, or implementation decisions in the executive summary and finding titles. Replace vague phrases like "diverse range of topics", "handling security concerns", "challenges in developing software", and "mitigating vulnerabilities" with the particular observed issue or say the sample is inconclusive.
+- Never label a C unit-testing question as evidence of C++ language semantics, or group otherwise unrelated languages/techniques simply because they share generic tags or programming terms.
+- When historical windows show earlier questions or findings about the same specific topic, call newly retrieved posts additional evidence of an existing topic, not a newly emerging topic. Check historical topic summaries even if the question IDs are new.
+- For site-wide heterogeneous samples, name two or three concrete standout questions in the executive summary; zero validated themes is preferable to inventing a broad recurring pattern.
 - Multiple executions on the same calendar day have already been collapsed. Treat each storedHistory item as one longitudinal observation window, not as one independent run.
 - Deep-dive answer state is deterministic application data. Use acceptedAnswerCount and acceptedAnswerId exactly as supplied. Never infer acceptance from prose, answer order, score, comments, or multiple plausible solutions. A Stack Overflow question can have at most one accepted answer; never describe multiple answers as accepted.
 - If acceptedAnswerCount is 1, do not call that question or thread unresolved, unanswered, or lacking a resolution. You may still describe the broader underlying developer problem as recurring only when separate supplied evidence supports that broader claim.
@@ -95,6 +106,7 @@ Rules:
 - Do not claim a question has the highest score, highest views, most answers, or highest research value. The application computes and displays all superlatives deterministically.
 - Do not repeat exact question metadata in notableQuestions. The application attaches title, score, views, tags, URL, research value, and deterministic ranking badges.
 - longitudinal.signals: 0–6 signals. Use growing, stable, or declining only when there are at least 3 distinct observation dates and the evidence is broader than one persistent question. Otherwise prefer new, recurring, or not-observed.
+- A longitudinal "new" topic requires at least 2 distinct current questions about the same narrowly defined phenomenon; an isolated question belongs only in notableQuestions. For recurrence, include earlier question IDs supporting that exact phenomenon, even when their tags or titles vary slightly.
 - Treat stored reports as application memory, not as facts outside the supplied data. Compare dates, distinct question IDs, and repeated themes explicitly.
 - measuredTrendStats compare the current time period with the immediately preceding equivalent period inside THIS run. Treat any percentage as a change in the retrieved sample, not a population-level change in Stack Overflow discussion volume. Do not confuse that baseline with stored observation windows. If comparisonStatus is low-volume, describe the counts cautiously and do not characterize the percentage as a meaningful trend signal.
 - Observation windows may be only one or two days apart and therefore heavily overlap. Recurrence can still be noted, but do not infer growing, stable, declining, fading, acceleration, or resolution from closely spaced rolling windows. Directional movement requires the supplied observationContext.directionEligible flag to be true.
